@@ -1,5 +1,6 @@
 # emr-editor
-EMR电子病历编辑器，护理文书编辑器，医联体医共体结构化电子病历
+EMR电子病历编辑器，护理文书编辑器，医联体医共体结构化电子病历。
+##### 在线地址：http://emr.xdawo.com/index.html?mode=2&simple=true&showToolbar=true
 
 
 # install & start demo
