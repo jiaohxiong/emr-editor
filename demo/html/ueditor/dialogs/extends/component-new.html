@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>常用组件</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <link href="../../../dialog.css" type="text/css" rel="stylesheet" />
+  <link href="../../pretty/bootstrap.min.css" rel="stylesheet">
+  <link href="../../pretty/font-awesome.min.css" rel="stylesheet">
+  <link async rel="stylesheet" href="../../pretty/materialdesignicons.min.css" />
+  <link async rel="stylesheet" href="../../pretty/material-design-iconic-font.min.css" />
+  <link async rel="stylesheet" href="../../pretty/ypicons.min.css" />
+  <link async rel="stylesheet" href="../../pretty/ionicons.min.css" />
+  <link href="../../pretty/icon?family=Material+Icons" rel="stylesheet">
+  
+  <link rel="stylesheet" type="text/css" href="../../pretty/pretty.min.css">
+  <link rel="stylesheet" type="text/css" href="../../pretty/htmleaf-demo.css">
+  <script type="text/javascript" src="../../third-party/jquery-1.10.2.js"></script>
+  <script type="text/javascript" src="../internal.js"></script>
+  <style type="text/css">
+    table a {
+      text-decoration: none;
+      margin-left: 5px;
+      margin-right: 5px;
+      color: blue;
+    }
+
+    table td {
+      padding: 8px 0px;
+      overflow-y: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-size: 13px;
+    }
+
+    td input[type='text'] {
+      width: 70%;
+    }
+
+    .title {
+      width: 12%;
+      text-align: right;
+      padding-right: 10px;
+    }
+
+    .content {
+      width: 70%;
+      text-align: left;
+      padding-left: 5px;
+    }
+    .form input[type='text'] {
+      -webkit-border-radius: 0;
+      -moz-border-radius: 0;
+      border-radius: 0;
+      background-color: transparent;
+      border: none;
+      box-shadow: none;
+      outline: none;
+      border-bottom: 1px solid #cccccc;
+      color: black;
+      padding-left: 5px;
+    }
+  </style>
+  <script type="text/javascript">
+    function createElement(type, name) {
+      var element = null;
+      try {
+        element = document.createElement('<' + type + ' name="' + name + '">');
+      } catch (e) { }
+      if (element == null) {
+        element = document.createElement(type);
+        element.name = name;
+      }
+      return element;
+    }
+    function $id(id) {
+      return document.getElementById(id);
+    }
+    //扩展chrome下的moveRow
+    if (!window.attachEvent) {
+      function getTRNode(nowTR, sibling) {
+        while (nowTR = nowTR[sibling]) if (nowTR.tagName == 'TR') break;
+        return nowTR;
+      }
+      if (typeof Element != 'undefined') {
+        Element.prototype.moveRow = function (sourceRowIndex, targetRowIndex) //执行扩展操作
+        {
+          if (!/^(table|tbody|tfoot|thead)$/i.test(this.tagName) || sourceRowIndex === targetRowIndex) return false;
+          var pNode = this;
+          if (this.tagName == 'TABLE') pNode = this.getElementsByTagName('tbody')[0]; //firefox会自动加上tbody标签，所以需要取tbody，直接table.insertBefore会error
+          var sourceRow = pNode.rows[sourceRowIndex],
+            targetRow = pNode.rows[targetRowIndex];
+          if (sourceRow == null || targetRow == null) return false;
+          var targetRowNextRow = sourceRowIndex > targetRowIndex ? false : getTRNode(targetRow, 'nextSibling');
+          if (targetRowNextRow === false) pNode.insertBefore(sourceRow, targetRow); //后面行移动到前面，直接insertBefore即可
+          else { //移动到当前行的后面位置，则需要判断要移动到的行的后面是否还有行，有则insertBefore，否则appendChild
+            if (targetRowNextRow == null) pNode.appendChild(sourceRow);
+            else pNode.insertBefore(sourceRow, targetRowNextRow);
+          }
+        }
+      }
+    }
+    /*删除tr*/
+    function fnDeleteRow(obj) {
+      var oTable = document.getElementById("options_table");
+      while (obj.tagName != 'TR') {
+        obj = obj.parentNode;
+      }
+      oTable.deleteRow(obj.rowIndex);
+    }
+
+    /*上移*/
+    function fnMoveUp(obj) {
+      var oTable = document.getElementById("options_table");
+      while (obj.tagName != 'TR') {
+        obj = obj.parentNode;
+      }
+      var minRowIndex = 1;
+      var curRowIndex = obj.rowIndex;
+      if (curRowIndex - 1 >= minRowIndex) {
+        oTable.moveRow(curRowIndex, curRowIndex - 1);
+      }
+
+    }
+    /*下移*/
+    function fnMoveDown(obj) {
+      var oTable = document.getElementById("options_table");
+      while (obj.tagName != 'TR') {
+        obj = obj.parentNode;
+      }
+      var maxRowIndex = oTable.rows.length;
+      var curRowIndex = obj.rowIndex;
+      if (curRowIndex + 1 < maxRowIndex) {
+        oTable.moveRow(curRowIndex, curRowIndex + 1);
+      }
+    }
+
+    /*生成tr*/
+    function fnAddComboTr(gName, obj) {
+      var oTable = document.getElementById('options_table');
+      var new_tr_node = oTable.insertRow(oTable.rows.length);
+      var new_td_node0 = new_tr_node.insertCell(0),
+        new_td_node1 = new_tr_node.insertCell(1);
+      new_td_node2 = new_tr_node.insertCell(2);
+      var sChecked = '';
+      if (obj.checked) sChecked = 'checked="checked"';
+      if (!obj.name) obj.name = '';
+      if (!obj.value) obj.value = '';
+      new_td_node0.innerHTML = '<div class="pretty primary"><input type="radio" ' + sChecked + ' name="' + obj.name + '"><label><i class="mdi mdi-check"></i></label></div>';
+      // new_td_node0.innerHTML = '<td><input type="radio" style="margin-left:12px;" class="change-value" '+sChecked+' name="'+obj.name+'"></td>';
+      new_td_node1.innerHTML = '<td><input type="text" value="' + obj.value + '" name="' + obj.name + '" placeholder="选项名称">&nbsp;<input type="text" value="' + obj.value + '" name="' + obj.name + '" placeholder="选项值"></td>';
+      new_td_node2.innerHTML = '<td><span class="btn-group clrfix"><button class="btn small primray" onclick="fnMoveDown(this);">下移</button> <button class="btn small primray" onclick="fnMoveUp(this);">上移</button> <button class="btn small error" onclick="fnDeleteRow(this);">删除</button></span></td>';
+      // new_td_node2.innerHTML ='<td><span class="btn-group clrfix"><button class="btn small error" onclick="fnDeleteRow(this);">删除</button></span></td>';
+      return true;
+    }
+    function fnAdd() {
+      var dName = 'hxField';
+      fnAddComboTr(dName, {
+        "checked": false,
+        "name": uuid(),
+        "value": ''
+      });
+    }
+    /*组合select*/
+    function fnParseOptions() {
+      var options = [];
+        var oTable = document.getElementById('options_table');
+        var nTr = oTable.getElementsByTagName('tr'), trLength = nTr.length;
+
+        for (var i = 0; i < trLength; i++) {
+          var inputs = nTr[i].getElementsByTagName('input');
+          if (inputs.length > 0) {
+            if (!inputs[1].value) continue;
+            var sChecked = '';
+            if (inputs[0].checked) sChecked = 'checked';
+            options.push({
+              label: inputs[1].value,
+              value: inputs[1].value,
+              selected: inputs[0].checked
+            })
+          }
+        }
+       return options;
+    }
+    document.addEventListener('click', function (e) {
+      var className = e.target.getAttribute('class') || '';
+      if (className.indexOf('change-value') > -1) { //改变默认值
+        // 获取当前值
+        var valueTarget = e.target.parentNode.nextSibling.getElementsByTagName('input')[0];
+        $id('defaultValue').value = valueTarget.value;
+      }
+    })
+  </script>
+</head>
+
+<body>
+  <div class="hx-content">
+    <table style="width:100%" class="form">
+      <tr>
+        <td class="title">控件名称</td>
+        <td class="content">
+          <input type="text" placeholder="" id="name">
+        </td>
+      </tr>
+      <tr>
+        <td class="title">适用科室</td>
+        <td class="content">
+          <input type="hidden" placeholder="选择科室" id="deptId">
+          <input type="text" placeholder="选择科室" id="deptName" style="width:60%;" disabled>
+          <button id="add-controll" class="small btn btn-primary" onclick="showDeptPicker()">选择</button>
+        </td>
+      </tr>
+      <tr>
+        <td class="title">默认值</td>
+        <td class="content">
+          <input type="text" placeholder="" id="defaultValue">
+        </td>
+      </tr>
+      <tr>
+        <td class="title">数据校验正则</td>
+        <td class="content">
+          <input type="text" placeholder="" id="regex">
+        </td>
+      </tr>
+      <tr>
+        <td class="title">字体颜色</td>
+        <td class="content">
+          <input type="text" placeholder="" value="#000000" style="width:60%;" id="color">
+          <input type="color" id="color" value="#3c3c3c" />
+        </td>
+      </tr>
+      <tr>
+        <td class="title">字体大小</td>
+        <td class="content">
+          <input type="text" placeholder="" value="12" id="fontSize">(px)
+        </td>
+      </tr>
+      <tr>
+        <td class="title">文本类型</td>
+        <td class="content">
+          <div class="pretty primary">
+            <input type="radio" name="textType" checked="checked" value="普通文本">
+            <label><i class="mdi mdi-check"></i> 普通文本</label>
+          </div>
+          <div class="pretty primary">
+            <input type="radio" name="textType" value="身份号码">
+            <label><i class="mdi mdi-check"></i> 身份号码</label>
+          </div>
+          <div class="pretty primary">
+            <input type="radio" name="textType" value="手机号码">
+            <label><i class="mdi mdi-check"></i> 手机号码</label>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="title">组件类型</td>
+        <td class="content">
+          <div class="pretty primary">
+            <input type="radio" name="typeName" checked="checked" value="input" type-name="文本框" command="input-quick">
+            <label><i class="mdi mdi-check"></i> 文本框</label>
+          </div>
+          <div class="pretty primary">
+            <input type="radio" name="typeName" value="radio" type-name="单选框" command="radio-quick">
+            <label><i class="mdi mdi-check"></i> 单选框</label>
+          </div>
+          <div class="pretty primary">
+            <input type="radio" name="typeName" value="checkbox" type-name="多选框" command="checkbox-quick">
+            <label><i class="mdi mdi-check"></i> 多选框</label>
+          </div>
+          <div class="pretty primary">
+            <input type="radio" name="typeName" value="select" type-name="下拉框" command="select-quick">
+            <label><i class="mdi mdi-check"></i> 下拉框</label>
+          </div>
+          <div class="pretty primary">
+            <input type="radio" name="typeName" value="timeinput" type-name="日期框" command="timeinput-quick">
+            <label><i class="mdi mdi-check"></i> 日期框</label>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="title">绑定数据源</td>
+        <td class="content">
+          <input type="hidden" placeholder="输入关键字查询" id="sourceId">
+          <input type="text" placeholder="选择数据源" id="sourceName" style="width:60%;" disabled>
+          <button id="add-controll" class="small btn btn-primary" onclick="showDataSouceDialog()">选择</button>
+        </td>
+      </tr>
+      <tr>
+        <td class="title">选项类型</td>
+        <td class="content">
+          <div class="pretty primary">
+            <input type="radio" name="mode" checked="checked" value="multiple">
+            <label><i class="mdi mdi-check"></i> 多选</label>
+          </div>
+          <div class="pretty primary">
+            <input type="radio" name="mode" value="single">
+            <label><i class="mdi mdi-check"></i> 单选</label>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="title">对齐方式</td>
+        <td class="content">
+          <div class="pretty primary">
+            <input type="radio" name="textAlign" checked="checked" value="left">
+            <label><i class="mdi mdi-check"></i> 左对齐</label>
+          </div>
+          <div class="pretty primary">
+            <input type="radio" name="textAlign" value="center">
+            <label><i class="mdi mdi-check"></i> 居中</label>
+          </div>
+          <div class="pretty primary">
+            <input type="radio" name="textAlign" value="right">
+            <label><i class="mdi mdi-check"></i> 右对齐</label>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="title">固定选项</td>
+        <td class="content">
+          <div style="padding: 5px;">
+            <div style="padding: 5px;margin-bottom: 15px;">
+              <button class="btn small btn-primary" id="add-option" onclick="fnAdd();">添加选项</button>
+            </div>
+            <table id="options_table" style="width:100%;">
+              <tr>
+                <th width="50px" style="text-align: center;">选中</th>
+                <th style="text-align: center;">选项</th>
+                <th width="140px" style="text-align: center;">操作</th>
+              </tr>
+            </table>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <script src="../../../dialog.js"></script>
+  <script type="text/javascript">
+    // 获取所有电子病历
+    const REQUEST_DATASOURCE_GETALLDOC = "getUserControlById";
+    var url = BASE_URL + REQUEST_DATASOURCE_GETALLDOC;
+    const nodeId = uuid();
+    function loadData() {
+      
+    }
+    function showDeptPicker() {
+      showDialog({
+        title: "选择适用部门",
+        width: 600,
+        height: 550,
+        data: {
+          nodeId: nodeId
+        },
+        name: "department-picker",
+        onok: function() {
+          console.log('on click ok')
+          let dept = JSON.parse(localStorage.getItem(nodeId+"-dept"));
+          if(dept) {
+            $("#deptId").val(dept.deptIds.join(','));
+            $("#deptName").val(dept.deptNames.join(','));
+          }
+        }
+      })
+    }
+
+    function showDataSouceDialog() {
+      console.log('show dialog', nodeId)
+      window.editor.execCommand('datasource-picker', {
+        nodeId: nodeId,
+        onok: function (ok) {
+          var data = sessionStorage.getItem(nodeId);
+          console.log('store data', nodeId, data)
+          const d = JSON.parse(data)
+          if (d) {
+            $id('sourceName').value = d.name;
+            $id('sourceId').value = d.sourceId;
+
+            console.log(d)
+          }
+          console.log('this is input html, dialog was closed', ok)
+        }
+      })
+    }
+
+    dialog.onok = function() {
+      let data = {
+        "name": "",
+        "color": "#000000",
+        "fontSize": "12",
+        "regex": "",
+        "width": "20",
+        "textType": "普通文本",
+        "textAlign": "left",
+        "defaultValue": "",
+        "sourceId": null,
+        "sourceName": null,
+        "deptId": "",
+        "deptName": "",
+        "mode": "multiple",
+        "typeId": "input",
+        "typeName": "文本框",
+        "typeCommand": "input-quick",
+        "options": fnParseOptions()
+      }
+      for (let key in data) {
+        let val = $("#" + key).val();
+        console.log(key, val);
+        if (val === 'undefined') {
+
+        } else if (val == null) {
+
+        } else {
+          data[key] = val;
+        }
+      }
+      data.textAlign = $("input[name='textAlign']:checked").val();
+      data.mode = $("input[name='mode']:checked").val();
+      data.typeId = $("input[name='typeName']:checked").val();
+      data.typeName = $("input[name='typeName']:checked").attr("type-name");
+      data.typeCommand = $("input[name='typeName']:checked").attr("command");
+      data.textType = $("input[name='textType']:checked").val();
+
+      console.log(data.typeName);
+      console.log(data.textType);
+      console.log($("#defaultValue").val())
+
+      addDataControl(data).then(res=>console.log(res));
+
+      console.log(p)
+      console.log('after request do')
+    }
+
+  </script>
+</body>
+
+</html>

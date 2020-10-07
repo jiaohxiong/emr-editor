@@ -1,0 +1,104 @@
+<!doctype HTML>
+<html>
+  <head>
+    <title>jQuery json-viewer</title>
+    <meta charset="utf-8" />
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="json-viewer/jquery.json-viewer.js"></script>
+    <link href="json-viewer/jquery.json-viewer.css" type="text/css" rel="stylesheet">
+
+    <style type="text/css">
+body {
+  margin: 0 100px;
+  font-family: sans-serif;
+}
+p.options label {
+  margin-right: 10px;
+}
+p.options input[type=checkbox] {
+  vertical-align: middle;
+}
+textarea#json-input {
+  width: 100%;
+  height: 200px;
+}
+pre#json-renderer {
+  border: 1px solid #aaa;
+}
+    </style>
+
+    <script>
+$(function() {
+  function renderJson() {
+    try {
+      var input = eval('(' + $('#json-input').val() + ')');
+    }
+    catch (error) {
+      return alert("Cannot eval JSON: " + error);
+    }
+    var options = {
+      collapsed: $('#collapsed').is(':checked'),
+      rootCollapsable: $('#root-collapsable').is(':checked'),
+      withQuotes: $('#with-quotes').is(':checked'),
+      withLinks: $('#with-links').is(':checked')
+    };
+    $('#json-renderer').jsonViewer(input, options);
+  }
+
+  // Generate on click
+  $('#btn-json-viewer').click(renderJson);
+
+  // Generate on option change
+  $('p.options input[type=checkbox]').click(renderJson);
+
+  // Display JSON sample on page load
+  renderJson();
+});
+    </script>
+  </head>
+  <body>
+    <h1><a href="https://github.com/abodelot/jquery.json-viewer">jQuery json-viewer</a></h1>
+    <textarea id="json-input" autocomplete="off">
+{
+  "id": 1001,
+  "type": "donut",
+  "name": "Cake",
+  "description": "https://en.wikipedia.org/wiki/Doughnut",
+  "price": 2.55,
+  "available": {
+    store: 42,
+    warehouse: 600
+  },
+  "toppings": [
+    { "id": 5001, "type": "None" },
+    { "id": 5002, "type": "Glazed" },
+    { "id": 5005, "type": "Sugar" },
+    { "id": 5003, "type": "Chocolate" },
+    { "id": 5004, "type": "Maple" }
+  ],
+  "uuids": [
+    "826b23ce-2669-4122-981f-3e2e4429159d",
+    "e32111a0-6a87-49ab-b58f-a01bf8d28ba0",
+    "c055a894-698e-41c0-b85f-7510a7351d9d",
+  ],
+}</textarea>
+    <p class="options">
+      Options:
+      <label title="Generate node as collapsed">
+        <input type="checkbox" id="collapsed">Collapse nodes
+      </label>
+      <label title="Allow root element to be collasped">
+        <input type="checkbox" id="root-collapsable" checked>Root collapsable
+      </label>
+      <label title="Surround keys with quotes">
+        <input type="checkbox" id="with-quotes">Keys with quotes
+      </label>
+      <label title="Generate anchor tags for URL values">
+        <input type="checkbox" id="with-links" checked>
+        With Links
+      </label>
+    </p>
+    <button id="btn-json-viewer" title="run jsonViewer()">Transform to HTML</button>
+    <pre id="json-renderer"></pre>
+  </body>
+</html>

@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>复选框</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" >
+    <link href="../../../dialog.css" type="text/css" rel="stylesheet" />
+      <link href="../../pretty/bootstrap.min.css" rel="stylesheet">
+      <link href="../../pretty/font-awesome.min.css" rel="stylesheet">
+      <link async rel="stylesheet" href="../../pretty/materialdesignicons.min.css" />
+      <link async rel="stylesheet" href="../../pretty/material-design-iconic-font.min.css" />
+      <link async rel="stylesheet" href="../../pretty/ypicons.min.css" />
+      <link async rel="stylesheet" href="../../pretty/ionicons.min.css" />
+      <link href="../../pretty/icon?family=Material+Icons" rel="stylesheet">
+      
+      <link rel="stylesheet" type="text/css" href="../../pretty/pretty.min.css">
+      <link rel="stylesheet" type="text/css" href="../../pretty/htmleaf-demo.css">
+    <script type="text/javascript" src="../../third-party/jquery-1.10.2.js"></script>
+    <script src="../../../dialog.js"></script>
+    <script type="text/javascript" src="../internal.js"></script>
+    <script type="text/javascript">
+      function createElement(type, name)
+      {
+        var element = null;
+        try {
+          element = document.createElement('<'+type+' name="'+name+'">');
+        } catch (e) {}
+        if(element==null) {
+          element = document.createElement(type);
+          element.name = name;
+        }
+        return element;
+      }
+      function $id(id){
+          return document.getElementById(id);
+      }
+      //扩展chrome下的moveRow
+      if (!window.attachEvent) {
+        function getTRNode(nowTR, sibling) {
+          while (nowTR = nowTR[sibling]) if (nowTR.tagName == 'TR') break;
+          return nowTR;
+        }
+        if (typeof Element != 'undefined') {
+          Element.prototype.moveRow = function(sourceRowIndex, targetRowIndex) //执行扩展操作
+          {
+            if (!/^(table|tbody|tfoot|thead)$/i.test(this.tagName) || sourceRowIndex === targetRowIndex) return false;
+            var pNode = this;
+            if (this.tagName == 'TABLE') pNode = this.getElementsByTagName('tbody')[0]; //firefox会自动加上tbody标签，所以需要取tbody，直接table.insertBefore会error
+            var sourceRow = pNode.rows[sourceRowIndex],
+              targetRow = pNode.rows[targetRowIndex];
+            if (sourceRow == null || targetRow == null) return false;
+            var targetRowNextRow = sourceRowIndex > targetRowIndex ? false: getTRNode(targetRow, 'nextSibling');
+            if (targetRowNextRow === false) pNode.insertBefore(sourceRow, targetRow); //后面行移动到前面，直接insertBefore即可
+            else { //移动到当前行的后面位置，则需要判断要移动到的行的后面是否还有行，有则insertBefore，否则appendChild
+              if (targetRowNextRow == null) pNode.appendChild(sourceRow);
+              else pNode.insertBefore(sourceRow, targetRowNextRow);
+            }
+          }
+        }
+      }
+      /*删除tr*/
+      function fnDeleteRow(obj){
+        var oTable = document.getElementById("options_table");
+        while(obj.tagName !='TR')
+        {
+          obj = obj.parentNode;
+        }
+        oTable.deleteRow(obj.rowIndex);
+      }
+
+      /*上移*/
+      function fnMoveUp(obj){
+        var oTable = document.getElementById("options_table");
+        while(obj.tagName !='TR')
+        {
+          obj = obj.parentNode;
+        }
+        var minRowIndex = 1;
+        var curRowIndex = obj.rowIndex;
+        if(curRowIndex-1>=minRowIndex) {
+          oTable.moveRow(curRowIndex,curRowIndex-1);
+        }
+
+      }
+      /*下移*/
+      function fnMoveDown(obj) {
+        var oTable = document.getElementById("options_table");
+        while(obj.tagName !='TR'){
+          obj = obj.parentNode;
+        }
+        var maxRowIndex = oTable.rows.length;
+        var curRowIndex = obj.rowIndex;
+        if(curRowIndex+1<maxRowIndex){
+          oTable.moveRow(curRowIndex,curRowIndex+1);
+        }
+      }
+
+      /*生成tr*/
+      function fnAddComboTr(gName,obj){
+        var oTable = document.getElementById('options_table');
+        var new_tr_node= oTable.insertRow(oTable.rows.length);
+        var new_td_node0 = new_tr_node.insertCell(0),
+            new_td_node1 = new_tr_node.insertCell(1),
+            new_td_node2 = new_tr_node.insertCell(2);
+        var sChecked = '';
+        if(obj.checked) sChecked = 'checked="checked"';
+        if(!obj.name) obj.name = '';
+        if(!obj.value) obj.value = '';
+        new_td_node0.innerHTML = '<td><input type="checkbox" '+sChecked+' name="'+gName+'"></td>';
+        new_td_node1.innerHTML = '<td><input type="text" value="'+obj.value+'" name="'+gName+'" placeholder="选项值"></td>';
+        new_td_node2.innerHTML ='<td><span class="btn-group clrfix"><button class="btn small primray" onclick="fnMoveDown(this);">下移</button> <button class="btn small primray" onclick="fnMoveUp(this);">上移</button> <button class="btn small error" onclick="fnDeleteRow(this);">删除</button></span></td>';
+        return true;
+      }
+      function fnAdd(){
+        var dName = $id('hidName').value;
+        if(!dName) dName = 'hxField';
+        fnAddComboTr(dName,{
+          "checked":false,
+          "name":'hxField',
+          "value":''
+        });
+      }
+      /*组合checkbox*/
+      function fnParseOptions(gName,gChecked,aynData){
+        var options = [];
+            html='';
+        if(aynData){ //动态获取数据
+          for(var i=0;i<aynData.length;i++){
+            var sChecked = '';
+            if(aynData[i].SELECTED){
+              sChecked = 'checked';
+            }
+            let nodeId = uuid();
+            html += '<label class="hxiong-field pretty o-primary"><input id="'+nodeId+'" class="hxiong-field" name="'+gName+'" value="'+aynData[i].VALUE+'" '+sChecked+' type="checkbox" onclick="if(checked){this.setAttribute(\'checked\',checked)}if(!checked){this.removeAttribute(\'checked\')}"/><i class="mdi mdi-check"></i>'+aynData[i].TEXT+'</label>';
+            if(gChecked=='vertical'){//竖排
+              html+='<br/>';
+            }
+            options.push(aynData[i]);
+          }
+        }else{
+          var oTable = document.getElementById('options_table');
+          var nTr = oTable.getElementsByTagName('tr'),
+            trLength = nTr.length;
+          for(var i=0;i<trLength;i++){
+            var inputs = nTr[i].getElementsByTagName('input');
+            if(inputs.length>0){
+              if(!inputs[1].value) continue;
+              var sChecked = '';
+               let nodeId = uuid();
+              if(inputs[0].checked) sChecked = 'checked';
+              html += '<span class="hxiong-field pretty o-primary"><input class="hxiong-field" name="'+gName+'" value="'+inputs[1].value+'" '+sChecked+' type="checkbox" onclick="if(checked){this.setAttribute(\'checked\',checked)}if(!checked){this.removeAttribute(\'checked\')}"/><label><i class="mdi mdi-check"></i>'+inputs[1].value+'</label></span>';
+              if(gChecked=='vertical'&&i<trLength-1){//竖排
+                html+='<br/>';
+              }
+              options.push({
+                VALUE : inputs[1].value,
+                TEXT : inputs[1].value,
+                SELECTED : inputs[0].checked
+              })
+            }
+          }
+        }
+        return {
+          html : html,
+          options : options
+        };
+      }
+    </script>
+</head>
+<body>
+<div class="content">
+    <input type="hidden" id="hidName">
+    <table class="form" style="margin-top:20px;">
+      <tr>
+        <td class="title"><span>控件名称</span></td>
+        <td class="content">
+          <input type="hidden" id="nodeId" placeholder="控件ID" />
+          <input type="text" id="nodeName" placeholder="必填项" class="input-clearable" required />
+        </td>
+      </tr>
+      <tr>
+        <td class="title"><span>数据源</span></td>
+        <td class="content">
+          <input type="text" id="sourceName" placeholder="数据源" disabled />
+          <input type="hidden" id="sourceId" placeholder="数据源" disabled />
+          <button onclick="showDataSouceDialog()" class="btn small btn-primary" id="add-option">选择</button>
+        </td>
+      </tr>
+      <tr>
+        <td class="title">选项类型</td>
+        <td class="content" id="mode">
+          <div class="pretty primary">
+            <input id="horizontal" type="radio" name="orient" checked="checked" value="horizontal">
+            <label><i class="mdi mdi-check"></i> 横排</label>
+          </div>
+          <div class="pretty primary">
+            <input id="vertical" type="radio" name="orient" value="vertical">
+            <label><i class="mdi mdi-check"></i> 纵排</label>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="title"><span>字体颜色</span></td>
+        <td class="content"><input type="color" id="color" value="#3c3c3c" /></td>
+      </tr>
+      <tr>
+        <td class="title">字体大小</td>
+        <td class="content">
+          <input type="text" id="fontSize" value="12" />(px)
+        </td>
+      </tr>
+      <tr>
+        <td class="title">固定选项</td>
+        <td class="content">
+          <div style="padding: 5px;">
+            <div style="padding: 5px;margin-bottom: 15px;">
+              <button class="btn small btn-primary" id="add-option" onclick="fnAdd();">添加选项</button>
+            </div>
+            <table id="options_table" style="width:100%;">
+              <tr>
+                <th width="50px" style="text-align: center;">选中</th>
+                <th style="text-align: center;">选项</th>
+                <!-- <th width="140px"  style="text-align: center;">操作</th> -->
+              </tr>
+            </table>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <!-- <table class="table hx-table">
+        <tr>
+            <th><span>控件名称</span><span class="label label-important">*</span></th>
+            <th><span>控件ID</span></th>
+            <th><span>排列方式</span></th>
+        </tr>
+        <tr>
+            <td><input type="text" id="nodeName" placeholder="必填项"/></td>
+            <td><input type="text" id="nodeId" placeholder="可选项" /></td>
+            <td>
+                <label><input type="radio" name="orient" id="horizontal" value="horizontal" checked="checked"/>横排</label>
+                <label><input type="radio" name="orient" id="vertical" value="vertical"/>竖排</label>
+            </td>
+        </tr>
+    </table>
+    <div class="hx-tab">
+        <ul class="hx-tab-list">
+            <li class="item active">固定选项</li>
+            <li class="item">数据源</li>
+        </ul>
+        <div class="hx-tab-content">
+            <div id="fixed" class="content active">
+                <div class="foot-btn">
+                    <button class="btn primray" id="add-option" onclick="fnAdd();">添加选项</button>
+                </div>
+                <table id="options_table" class="table hx-table">
+                    <tr>
+                        <th width="50px"><span>选中</span></th>
+                        <th><span>选项值</span></th>
+                        <th width="130px"><span>操作</span></th>
+                    </tr>
+                </table>
+            </div>
+            <div id="dynamic" class="content">
+              <input type="text" placeholder="请选择数据源" disabled style="width:70%;" id="sourceId">
+              <button class="btn primray" id="add-option" onclick="fnSearch();">查找</button>
+              <div class="alert alert-info">
+                <h4>提示：</h4>
+                <ol>
+                  <li>1、数据源和固定选项只能二选一，默认数据源优先级高与固定数据。</li>
+                  <li>2、选择完数据源后会将数据在此预览。</li>
+                </ol>
+              </div>
+            </div>
+        </div>
+    </div> -->
+
+
+</div>
+<script type="text/javascript">
+    var oNode = null,thePlugins = 'checkbox';
+    var baseUrl = './ueditor/dialogs/hx-form';
+    var nodeId = uuid();
+    window.onload = function() {
+      //tab选项卡
+      var oTab=document.getElementsByClassName('hx-tab')[0];
+      var aLi=oTab.getElementsByClassName('hx-tab-list')[0].getElementsByTagName('li');
+      var oTabBox=oTab.getElementsByClassName('hx-tab-content')[0];
+      var aBox=oTabBox.getElementsByClassName('content');
+      for(var i=0;i<aLi.length;i++){
+        aLi[i].index=i;
+        aLi[i].onclick=function(){
+          for(var j=0;j<aLi.length;j++){
+            aLi[j].className='item';//取消菜单样式
+            aBox[j].className='content';//隐藏所有的tabDiv
+          }
+          aLi[this.index].className='item active';
+          aBox[this.index].className='content active';
+        }
+      }
+      if( UE.plugins[thePlugins].editdom ){
+        oNode = UE.plugins[thePlugins].editdom;
+        var obj = eval("("+oNode.getAttribute('obj')+")");
+        var gTitle= oNode.getAttribute('title');
+        var nodeId = oNode.getAttribute('id');
+        $id('nodeName').value = gTitle;
+        $id('nodeId').value = nodeId||"";
+        var checked = oNode.getAttribute('orgchecked');
+        checked=='horizontal' ? $id('horizontal').checked = true : $id('vertical').checked = true;
+        if(obj.sourceId != ''){ //如果存在动态地址,将地址回填，并切换到url选项卡
+          $id('sourceId').value = obj.sourceId;
+          aLi[1].click();
+        }else{
+          var inputTags = oNode.getElementsByTagName('input');
+          var length = inputTags.length;
+          var aInputs = [];
+          for(var i=0;i<length;i++) {
+            if(inputTags[i].type =='checkbox'){
+              var obj = {
+                checked : inputTags[i].checked,
+                value : inputTags[i].value,
+                name : inputTags[i].name
+              };
+              fnAddComboTr(inputTags[i],obj);
+            }
+          }
+        }
+      }
+    }
+    dialog.oncancel = function () {
+      if( UE.plugins[thePlugins].editdom ) {
+        delete UE.plugins[thePlugins].editdom;
+      }
+    };
+    dialog.onok = function (){
+      if( $G('nodeName').value == '') {
+        alert('控件名称不能为空');
+        return false;
+      }
+      var gTimestamp = new Date().getTime();
+      // var nodeId = $id('nodeId').value;
+      var name = nodeId + gTimestamp;
+      var gTitle = $id('nodeName').value;
+      var placeStyle = 'width:auto'; //防止ueditor改变样式
+      var gChecked = 'horizontal';
+      if ($id('vertical').checked) gChecked = 'vertical';
+      if(!name){
+        name = $id('nodeName').value + gTimestamp;
+      }
+      var options = fnParseOptions(name,gChecked).html;
+      var obj = {
+        sourceId : $id('sourceId').value,
+        type : 'checkbox',
+        nodeName :$id('nodeName').value,
+        nodeId : $id('nodeId').value || nodeId,
+        options : fnParseOptions(name,gChecked).options
+      };
+      
+      if(!options){
+        alert('请添加选项');
+        return false;
+      }
+      var objStr = JSON.stringify(obj).replace(/\"/g,"\'");
+      if( !oNode ) {
+        try {
+          //{|- 使用边界，防止用户删除了span标签，程序处理要把边界替换为空
+           var html = '<span class="hxiong-field hxplugin" style="'+placeStyle+'" hxplugin="checkbox" id="'+nodeId+'" title="'+gTitle+'" orgchecked="'+gChecked+'" obj="'+objStr+'" contenteditable="false">';
+           html += '<span class="hxiong-field hx-left" style="'+placeStyle+'" contenteditable="false">[</span>';
+           html +=options;
+           html += '<span class="hxiong-field hx-right" style="'+placeStyle+'" contenteditable="false">]</span>';
+           html +='</span>';
+          editor.execCommand('insertHtml',html);
+          return true ;
+        } catch ( e ) {
+            try {
+              editor.execCommand('error');
+            } catch ( e ) {
+              alert('控件异常，请找黄兄反馈协助！');
+            }
+            return false;
+          }
+        } else {
+          oNode.setAttribute('title',gTitle);
+          oNode.setAttribute('orgchecked',gChecked);
+          oNode.setAttribute('obj',objStr)
+          oNode.innerHTML = '<span class="hxiong-field hx-left" style="'+placeStyle+'" contenteditable="false">[</span>'+options
+            + '<span class="hxiong-field hx-right" style="'+placeStyle+'" contenteditable="false">]</span>';
+          delete UE.plugins[thePlugins].editdom;
+          return true;
+        }
+    };
+    function showDataSouceDialog() {
+        console.log('show dialog', nodeId)
+        window.editor.execCommand('datasource-picker', {
+          nodeId: nodeId,
+          onok: function (ok) {
+            var data = sessionStorage.getItem(nodeId);
+            console.log('store data', nodeId, data)
+            const d = JSON.parse(data)
+            if (d) {
+              $id('sourceName').value = d.name;
+              $id('sourceId').value = d.sourceId;
+
+              console.log(d)
+            }
+            console.log('this is input html, dialog was closed', ok)
+          }
+        })
+      }
+</script>
+</body>
+</html>

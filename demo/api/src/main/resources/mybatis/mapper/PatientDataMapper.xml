@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="hxiong.gloves.glovesapi.mapper.PatientDataMapper">
+  <update id="copyDocDataToPatientData">
+    insert into t_patient_data
+    (
+      `patient_doc_id`,
+      `patient_doc_version`,
+      `node_id`,
+      `source_id`,
+      `name`,
+      `value`,
+      `type`,
+      `regex`,
+      `group_name`,
+      `total_group_name`,
+      `plan`
+    )
+    select 
+      #{patientDocId},
+      #{patientDocVersion},
+      `node_id`,
+      `source_id`,
+      `name`,
+      `value`,
+      `type`,
+      `regex`,
+      `group_name`,
+      `total_group_name`,
+      `plan`
+    from t_doc_data
+    where  doc_id = #{docId} and version = #{docVersion};
+
+  </update>
+  <insert id="insertBatach">
+    insert into t_patient_data
+    (patient_doc_id,`patient_doc_version`,node_id,`source_id`,`name`,`value`,`type`,group_name,total_group_name,`regex`,plan)
+    values
+    <foreach collection ="list" item="d" separator =",">
+      (#{d.patientDocId},#{d.patientDocVersion}, #{d.nodeId}, #{d.sourceId}, #{d.name}, #{d.value}, #{d.type}, #{d.groupName}, #{d.totalGroupName}, #{d.regex}, #{d.plan})
+    </foreach >
+  </insert>
+</mapper>

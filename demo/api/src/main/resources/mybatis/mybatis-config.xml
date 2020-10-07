@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD SQL Map Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <settings>
+        <!-- 全局映射器启用缓存 -->
+        <setting name="cacheEnabled" value="true" />
+        <!-- 获取数据库自增主键值 -->
+        <setting name="useGeneratedKeys" value="true" />
+        <!-- 配置默认的执行器  (SIMPLE 就是普通的执行器；REUSE 执行器会重用预处理语句  BATCH 执行器将重用语句并执行批量更新) -->
+        <setting name="defaultExecutorType" value="REUSE" />
+        <!-- 使用列别名替换列名，默认为 true -->
+        <setting name="useColumnLabel" value="true"/>
+        <!-- 开启驼峰命名转换：Table(create_time) => Entity(createTime) -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <setting name="logImpl" value="org.apache.ibatis.logging.stdout.StdOutImpl"/>
+    </settings>
+
+</configuration>

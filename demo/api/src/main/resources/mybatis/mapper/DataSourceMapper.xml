@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="hxiong.gloves.glovesapi.mapper.DataSourceMapper" >
+  <select id="getSqlDataSource" resultType="java.util.HashMap">
+   ${sql}
+  </select>
+  <select id="getSqlDataSourceByDocId" parameterType="hxiong.gloves.glovesapi.entity.TypeDoc" resultType="hxiong.gloves.glovesapi.entity.DataSource">
+    select s.content from t_doc_data d
+    left join t_doc_source s on d.source_id = s.source_id
+    where d.doc_id = #{docId} and d.version = #{version} and s.`type`='SQL' 
+  </select>
+</mapper>

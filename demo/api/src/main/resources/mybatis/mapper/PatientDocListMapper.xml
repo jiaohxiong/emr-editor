@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="hxiong.gloves.glovesapi.mapper.PatientDocListMapper">
+  <insert id="addPatientDocList" parameterType="hxiong.gloves.glovesapi.entity.PatientDocList">
+    insert into gloves.t_patient_doc_list
+    (
+      `patient_doc_id`,
+      `patient_doc_version` ,
+      `create_user_id`,
+      `create_user_name` ,
+      `create_time`,
+      `html`,
+      `structure`
+    )
+    select 
+    
+      #{patientDocId},
+      1,
+      #{createUserId},
+      #{createUserName},
+      now(),
+      `html`,
+      `structure`
+    from gloves.t_doc d
+      where d.doc_id = #{docId} and d.version = #{docVersion}
+  </insert>
+
+  <select id="getPatientDocInfoById" resultType="hxiong.gloves.glovesapi.entity.PatientDocInfo">
+    select 
+      d.`id`,
+      d.`patient_doc_id`,
+      d.`last_patient_doc_version` as `patient_doc_version`,
+      d.`doc_id`,
+      doc.name as `doc_name`,
+      d.`doc_version`,
+      d.`patient_id`,
+      d.`create_time` ,
+      d.`create_user_id`,
+      d.`create_user_name`,
+      d.`last_update_user_id`,
+      d.`last_upate_user_name`,
+      d.`last_update_time`,
+      dl.`html`
+
+    from gloves.t_patient_doc d
+      left join gloves.t_doc doc 
+        on d.doc_id = doc.doc_id and d.doc_version = doc.version
+      left join gloves.t_patient_doc_list dl 
+        on d.patient_doc_id = dl.patient_doc_id and d.last_patient_doc_version = dl.patient_doc_version
+      where d.patient_doc_id = #{patientDocId}
+       <!-- and d.last_patient_doc_version = #{patientDocVersion} -->
+  </select>
+  <select id="getPatientDocInfoById4M" resultType="hxiong.gloves.glovesapi.entity.PatientDocInfo">
+    select 
+      d.`id`,
+      d.`patient_doc_id`,
+      d.`last_patient_doc_version` as `patient_doc_version`,
+      d.`doc_id`,
+      doc.name as `doc_name`,
+      d.doc_type,
+      d.`doc_version`,
+      d.`patient_id`,
+      d.`create_time` ,
+      d.`create_user_id`,
+      d.`create_user_name`,
+      d.`last_update_user_id`,
+      d.`last_upate_user_name`,
+      d.`last_update_time`
+
+    from gloves.t_patient_doc d
+      left join gloves.t_doc doc 
+        on d.doc_id = doc.doc_id and d.doc_version = doc.version
+      left join gloves.t_patient_doc_list dl 
+        on d.patient_doc_id = dl.patient_doc_id and d.last_patient_doc_version = dl.patient_doc_version
+      where d.patient_doc_id = #{patientDocId}
+       <!-- and d.last_patient_doc_version = #{patientDocVersion} -->
+  </select>
+</mapper>

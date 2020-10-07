@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>数据源</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <link href="../../../dialog.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../../third-party/jquery-1.10.2.js"></script>
+  <script type="text/javascript" src="../internal.js"></script>
+  <style type="text/css">
+    table a {
+      text-decoration: none;
+      margin-left: 5px;
+      margin-right: 5px;
+      color: blue;
+    }
+
+    table a:hover {
+      color: rgb(231, 46, 14);
+    }
+
+    table tr:nth-child(even) {
+      /*background: #dfdfdf;*/
+    }
+
+    table tr:hover {
+      background: #e5cfa5;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="hx-content">
+    <div class="hx-search-bar">
+      <input type="text" placeholder="输入关键字查询" id="keyword">
+      <select id="sourceType">
+        <option value="护理文书">护理文书</option>
+        <option value="电子病历">电子病历</option>
+      </select>
+      <button id="search" class="btn primray" onclick="loadData()">查询</button>
+    </div>
+
+    <div class="hx-table-list">
+      <table id="table" class="table hx-table" width="100%" cellspacing="0">
+        <thead>
+          <th style="width:20px;"></th>
+          <th style="width:40px;">序号</th>
+          <th style="width:220px;">编号</th>
+          <th style="width:80px;">类型</th>
+          <th style="width:150px;">名称</th>
+          <th>附加项</th>
+          <!-- <th>数据内容</th> -->
+          <th style="width:100px;">操作</th>
+        </thead>
+        <tbody>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script src="../../../dialog.js"></script>
+  <script type="text/javascript">
+    // 获取所有电子病历
+    const REQUEST_DATASOURCE_GETALLDOC = "getAllDataSource";
+    const url = BASE_URL + REQUEST_DATASOURCE_GETALLDOC;
+    
+    var docList = []
+    function loadData() {
+      UE.ajax.request(url, {
+        method: 'GET',
+        timeout: 10000,
+        async: true,
+        onsuccess: function (xhr) {
+          const r = eval('(' + xhr.responseText + ')');
+          if (r.status != 0) {
+            alert(r.msg)
+          } else {
+            $("#table tbody").empty();
+            r.data.map((item, index) => {
+              let d = UE.utils.makeInstance(item);
+              d.content = encodeURI(d.content);
+              d.name= d.name
+              d.type= d.type
+              d.id= d.id
+              d.extra= d.extra
+              d.sourceId= d.sourceId
+
+              let s = JSON.stringify(d);
+              $("#table tbody").append('<tr>' +
+                '<td><input type="checkbox" value="'+item.id+'"></input></td>' +
+                '<td>' + (index + 1) + '</td>' +
+                '<td>' + item.sourceId + '</td>' +
+                '<td>' + item.type + '</td>' +
+                '<td>' + item.name + '</td>' +
+                '<td>' + (item.extra ? item.extra : '&nbsp;') + '</td>' +
+                // '<td>'+item.content+'</td>'+
+                '<td>' +
+                '<a href="javascript:void()" onclick="showDetail(\'' + encodeURI(s) + '\')">查看</a>' +
+                '<a href="#" href="javascript:void()" onclick="useDataSource(\'' + encodeURI(s) + '\')">使用</a>' +
+                '</td>' +
+                '</tr>')
+            })
+          }
+        },
+        //请求失败或者超时后的回调。
+        onerror: function (xhr) {
+          alert('接口服务已断开或正在重启中～');
+        }
+      })
+    }
+
+    function useDataSource(data) {
+      console.log(getQuery('nodeId'), decodeURI(data))
+      localStorage.setItem(getQuery('nodeId'), decodeURI(data))
+      dialog.close(true);
+    }
+
+    function showDetail(data) {
+      const d = JSON.parse(decodeURI(data))
+      const title = "数据源详情(SQL) - " + d.name
+      showDialog({
+        name: d.type=="JSON"?"json-data":"sql-data",
+        title: title,
+        data: {
+          content : d.content
+        },
+        height: 500,
+        width: 680
+      });
+    }
+    loadData();
+  </script>
+</body>
+
+</html>

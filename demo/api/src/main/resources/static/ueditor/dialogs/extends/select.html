@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>复选框</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <link href="../../../dialog.css" type="text/css" rel="stylesheet" />
+    <link href="../../pretty/bootstrap.min.css" rel="stylesheet">
+    <link href="../../pretty/font-awesome.min.css" rel="stylesheet">
+    <link async rel="stylesheet" href="../../pretty/materialdesignicons.min.css" />
+    <link async rel="stylesheet" href="../../pretty/material-design-iconic-font.min.css" />
+    <link async rel="stylesheet" href="../../pretty/typicons.min.css" />
+    <link async rel="stylesheet" href="../../pretty/ionicons.min.css" />
+    <link href="../../pretty/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="../../pretty/pretty.min.css">
+    <link rel="stylesheet" type="text/css" href="../../pretty/htmleaf-demo.css">
+    <script type="text/javascript" src="../../third-party/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="../internal.js"></script>
+
+    <style>
+    input[disabled]{
+        color: gray;
+        background:#f7f7f7;
+    }
+    table td {
+      padding: 8px 0px;
+      overflow-y: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-size: 13px;
+    }
+
+    td input[type='text'] {
+      width: 70%;
+    }
+
+    .title {
+      font-weight: bold;
+      width: 12%;
+      text-align: right;
+      padding-right: 10px;
+    }
+
+    .form .content {
+      width: 70%;
+      text-align: left;
+      padding-left: 5px;
+    }
+    .form input[type='text'] {
+      -webkit-border-radius: 0;
+      -moz-border-radius: 0;
+      border-radius: 0;
+      background-color: transparent;
+      border: none;
+      box-shadow: none;
+      outline: none;
+      border-bottom: 1px solid #cccccc;
+    }
+    </style>
+    <script type="text/javascript">
+      function createElement(type, name)
+      {
+        var element = null;
+        try {
+          element = document.createElement('<'+type+' name="'+name+'">');
+        } catch (e) {}
+        if(element==null) {
+          element = document.createElement(type);
+          element.name = name;
+        }
+        return element;
+      }
+      function $id(id){
+        return document.getElementById(id);
+      }
+      //扩展chrome下的moveRow
+      if (!window.attachEvent) {
+        function getTRNode(nowTR, sibling) {
+          while (nowTR = nowTR[sibling]) if (nowTR.tagName == 'TR') break;
+          return nowTR;
+        }
+        if (typeof Element != 'undefined') {
+          Element.prototype.moveRow = function(sourceRowIndex, targetRowIndex) //执行扩展操作
+          {
+            if (!/^(table|tbody|tfoot|thead)$/i.test(this.tagName) || sourceRowIndex === targetRowIndex) return false;
+            var pNode = this;
+            if (this.tagName == 'TABLE') pNode = this.getElementsByTagName('tbody')[0]; //firefox会自动加上tbody标签，所以需要取tbody，直接table.insertBefore会error
+            var sourceRow = pNode.rows[sourceRowIndex],
+              targetRow = pNode.rows[targetRowIndex];
+            if (sourceRow == null || targetRow == null) return false;
+            var targetRowNextRow = sourceRowIndex > targetRowIndex ? false: getTRNode(targetRow, 'nextSibling');
+            if (targetRowNextRow === false) pNode.insertBefore(sourceRow, targetRow); //后面行移动到前面，直接insertBefore即可
+            else { //移动到当前行的后面位置，则需要判断要移动到的行的后面是否还有行，有则insertBefore，否则appendChild
+              if (targetRowNextRow == null) pNode.appendChild(sourceRow);
+              else pNode.insertBefore(sourceRow, targetRowNextRow);
+            }
+          }
+        }
+      }
+      /*删除tr*/
+      function fnDeleteRow(obj){
+        var oTable = document.getElementById("options_table");
+        while(obj.tagName !='TR')
+        {
+          obj = obj.parentNode;
+        }
+        oTable.deleteRow(obj.rowIndex);
+      }
+
+      /*上移*/
+      function fnMoveUp(obj){
+        var oTable = document.getElementById("options_table");
+        while(obj.tagName !='TR')
+        {
+          obj = obj.parentNode;
+        }
+        var minRowIndex = 1;
+        var curRowIndex = obj.rowIndex;
+        if(curRowIndex-1>=minRowIndex) {
+          oTable.moveRow(curRowIndex,curRowIndex-1);
+        }
+
+      }
+      /*下移*/
+      function fnMoveDown(obj) {
+        var oTable = document.getElementById("options_table");
+        while(obj.tagName !='TR'){
+          obj = obj.parentNode;
+        }
+        var maxRowIndex = oTable.rows.length;
+        var curRowIndex = obj.rowIndex;
+        if(curRowIndex+1<maxRowIndex){
+          oTable.moveRow(curRowIndex,curRowIndex+1);
+        }
+      }
+
+      /*生成tr*/
+      function fnAddComboTr(gName,obj){
+        var oTable = document.getElementById('options_table');
+        var new_tr_node= oTable.insertRow(oTable.rows.length);
+        var new_td_node0 = new_tr_node.insertCell(0),
+            new_td_node1 = new_tr_node.insertCell(1);
+            new_td_node2 = new_tr_node.insertCell(2);
+        var sChecked = '';
+        if(obj.checked) sChecked = 'checked="checked"';
+        if(!obj.name) obj.name = '';
+        if(!obj.value) obj.value = '';
+        new_td_node0.innerHTML = '<div class="pretty primary"><input type="radio" '+sChecked+' name="'+obj.name+'"><label><i class="mdi mdi-check"></i></label></div>';
+        // new_td_node0.innerHTML = '<td><input type="radio" style="margin-left:12px;" class="change-value" '+sChecked+' name="'+obj.name+'"></td>';
+        new_td_node1.innerHTML = '<td><input type="text" value="'+obj.value+'" name="'+obj.name+'" placeholder="选项名称">&nbsp;<input type="text" value="'+obj.value+'" name="'+obj.name+'" placeholder="选项值"></td>';
+        new_td_node2.innerHTML ='<td><span class="btn-group clrfix"><button class="btn small primray" onclick="fnMoveDown(this);">下移</button> <button class="btn small primray" onclick="fnMoveUp(this);">上移</button> <button class="btn small error" onclick="fnDeleteRow(this);">删除</button></span></td>';
+        // new_td_node2.innerHTML ='<td><span class="btn-group clrfix"><button class="btn small error" onclick="fnDeleteRow(this);">删除</button></span></td>';
+        return true;
+      }
+      function fnAdd(){
+        var dName = $id('hidName').value;
+        if(!dName) dName = 'hxField';
+        fnAddComboTr(dName,{
+          "checked":false,
+          "name":uuid(),
+          "value":''
+        });
+      }
+      /*组合select*/
+      function fnParseOptions(){
+        var options = [], defaultValue='';
+
+        var oTable = document.getElementById('options_table');
+        var nTr = oTable.getElementsByTagName('tr'),
+          trLength = nTr.length;
+
+        for(var i=0;i<trLength;i++){
+          var inputs = nTr[i].getElementsByTagName('input');
+          if(inputs.length>0){
+            if(!inputs[1].value) continue;
+            var sChecked = '';
+            if(inputs[0].checked) sChecked = 'checked';
+            options.push({
+              label : inputs[1].value,
+              value : inputs[1].value,
+              selected :inputs[0].checked
+            })
+          }
+        }
+        defaultValue = $id('defaultValue').value || '&nbsp;';
+        
+        return {
+          options : options,
+          defaultValue : defaultValue
+        };
+      }
+      document.addEventListener('click',function(e){
+        var className = e.target.getAttribute('class')||'';
+        if(className.indexOf('change-value')>-1){ //改变默认值
+           // 获取当前值
+          var valueTarget = e.target.parentNode.nextSibling.getElementsByTagName('input')[0];
+          $id('defaultValue').value = valueTarget.value;
+        }
+      })
+    </script>
+</head>
+<body>
+<div class="content">
+    <input type="hidden" id="hidName">
+    <table class="form" style="margin-top:20px;">
+      <tr>
+        <td class="title"><span>控件名称</span></td>
+        <td class="content">
+          <input type="hidden" id="nodeId" placeholder="控件ID" />
+          <input type="text" id="nodeName" placeholder="必填项" class="input-clearable" required />
+        </td>
+      </tr>
+      <tr>
+        <td class="title"><span>数据源</span></td>
+        <td class="content">
+          <input type="text" id="sourceName" placeholder="数据源" disabled />
+          <input type="hidden" id="sourceId" placeholder="数据源" disabled />
+          <button onclick="showDataSouceDialog()" class="btn small btn-primary" id="add-option">选择</button>
+        </td>
+      </tr>
+      <tr>
+        <td class="title">选项类型</td>
+        <td class="content">
+          <div class="pretty primary">
+            <input id="multiple" type="radio" name="mode" checked="checked" value="multiple">
+            <label><i class="mdi mdi-check"></i> 多选</label>
+          </div>
+          <div class="pretty primary">
+            <input id="single" type="radio" name="mode" value="single">
+            <label><i class="mdi mdi-check"></i> 单选</label>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="title">样式</td>
+        <td class="content">
+          <div class="pretty primary">
+            <input id="style_select" type="radio" name="style" checked="checked" value="select">
+            <label><i class="mdi mdi-check"></i> 下拉框</label>
+          </div>
+          <div class="pretty primary">
+            <input id="style_cell" type="radio" name="style" value="cell">
+            <label><i class="mdi mdi-check"></i> 单元格</label>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="title"><span>记分总分名称</span></td>
+        <td class="content">
+          <input type="text" id="groupName" placeholder="可选项" />
+        </td>
+      </tr>
+      <tr>
+        <td class="title"><span>默认值</span></td>
+        <td class="content">
+          <input type="text" id="defaultValue" placeholder="可选项" />
+        </td>
+      </tr>
+      <tr>
+        <td class="title"><span>字体颜色</span></td>
+        <td class="content"><input type="color" id="color" value="#3c3c3c" /></td>
+      </tr>
+      <tr>
+        <td class="title">字体大小</td>
+        <td class="content">
+          <input type="text" id="fontSize" value="12" />(px)
+        </td>
+      </tr>
+      <tr>
+        <td class="title"><span>限定符</span></td>
+        <td class="content">
+          <div class="pretty primary">
+            <input type="radio" name="rangeChar" checked="checked" value="underline">
+            <label><i class="mdi mdi-check"></i> 下划线</label>
+          </div>
+          <div class="pretty primary">
+            <input type="radio" name="rangeChar" value="bracket">
+            <label><i class="mdi mdi-check"></i> 英文中括号</label>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="title"><span>是否必填</span></td>
+        <td class="content">
+          <div class="pretty primary">
+            <input type="radio" name="required" checked="checked" value="1">
+            <label><i class="mdi mdi-check"></i> 必填项</label>
+          </div>
+          <div class="pretty primary">
+            <input type="radio" name="required" value="0">
+            <label><i class="mdi mdi-check"></i> 非必填项</label>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="title">固定选项</td>
+        <td class="content">
+          <div style="padding: 5px;">
+            <div style="padding: 5px;margin-bottom: 15px;">
+              <button class="btn small btn-primary" id="add-option" onclick="fnAdd();">添加选项</button>
+            </div>
+            <table id="options_table" style="width:100%;">
+              <tr>
+                <th width="50px" style="text-align: center;">选中</th>
+                <th  style="text-align: center;">选项</th>
+                <th width="140px"  style="text-align: center;">操作</th>
+              </tr>
+            </table>
+          </div>
+        </td>
+      </tr>
+    </table>
+</div>
+<script src="../../../dialog.js"></script>
+<script type="text/javascript">
+  var nodeId = uuid();
+  var oNode = null,thePlugins = 'select';
+  var baseUrl = './ueditor/dialogs/hx-form';
+  window.onload = function() {
+
+    if( UE.plugins[thePlugins].editdom ){
+      oNode = UE.plugins[thePlugins].editdom;
+      var obj = eval("("+(oNode.getAttribute('obj')||{})+")");
+      $id('nodeName').value = obj.nodeName||'';
+      $id('nodeId').value = obj.nodeId || '';
+      $id('defaultValue').value = obj.defaultValue||'';
+      $id('groupName').value = obj.groupName||'';
+      $id('color').value = obj.color||'';
+      if(obj.mode == "single") {
+        $id('single').checked = true;
+      }
+      if(obj.style == "select") {
+        $id("style_select").checked = true;
+      } else{
+        $id("style_cell").checked = true;
+      }
+
+      $("input[name='rangeChar']").each(function () {
+        if (this.value == obj.rangeChar) {
+          this.checked = true;
+        }
+      })
+      $("input[name='score']").each(function () {
+        if (this.value == obj.score) {
+          this.checked = true;
+        }
+      })
+
+      $("input[name='required']").each(function () {
+        if (this.value == obj.required) {
+          this.checked = true;
+        }
+      })
+
+      console.log('select mode ', obj.mode);
+
+      if(obj.sourceId){ //如果存在动态地址,将地址回填，并切换到url选项卡
+        console.log('get data from data source')
+      }else{
+        var optionTags = obj.options;
+        for(var i=0;i<optionTags.length;i++) {
+          var obj = {
+            checked : optionTags[i].selected,
+            value : optionTags[i].value,
+            name : optionTags[i].name
+          };
+          fnAddComboTr(optionTags[i],obj);
+        }
+      }
+    }
+  }
+  dialog.oncancel = function () {
+    if( UE.plugins[thePlugins].editdom ) {
+      delete UE.plugins[thePlugins].editdom;
+    }
+  };
+  dialog.onok = function (){
+    if( $id('nodeName').value == '') {
+      alert('控件名称不能为空');
+      return false;
+    }
+    let opt = fnParseOptions();
+    console.log('this select options', opt);
+    var obj = {
+      type : 'select',
+      sourceId : $id('sourceId').value,
+      nodeName :$id('nodeName').value,
+      totalGroupName :$id('groupName').value || '',
+      nodeId : $id('nodeId').value || uuid(),
+      color : $id('color').value,
+      mode : $id('single').checked?"single":"multiple",
+      style: $id("style_select").checked?"select":"cell",
+      defaultValue :$id('defaultValue').value ,
+      options : opt.options,
+      rangeChar: $("input[name='rangeChar']:checked").val() || 'underline',
+      required: parseInt($("input[name='required']:checked").val() || '1')
+    };
+    
+    if(!opt.options){
+      alert('请添加选项');
+      return false;
+    }
+    
+    var objStr = JSON.stringify(obj).replace(/\"/g,"\'");
+    console.log(objStr)
+
+    let rangeCss = "";
+    let bracketStyle = "width:auto;";
+    if (obj.rangeChar == "underline") {
+      rangeCss = "hxiong-field-input";
+      bracketStyle += "color:transparent;"
+    }
+    
+    if( !oNode ) {
+      try {
+        
+        //{|- 使用边界，防止用户删除了span标签，程序处理要把边界替换为空
+        var html ='';
+        if(obj.style == "select") {
+          let placeStyle = 'width:auto;'; //防止ueditor改变样式
+          html = '<span class="hxiong-field hxplugin ' + rangeCss +'" style="' + placeStyle + '" hxplugin="select" title="' + obj.nodeName + '" obj="' + objStr + '" contenteditable="false">';
+          html += '<span class="hxiong-field hx-left" style="' + bracketStyle + '" contenteditable="false">&#8203;</span>';
+          html += '<span class="hxiong-field hxiong-field-value" style="color: ' + obj.color + '">' + opt.defaultValue + '</span>';
+          html += '<span class="hxiong-field hx-right" style="' + bracketStyle + '" contenteditable="false">&#8203;</span>';
+          html += '</span>';
+        } else if(obj.style == "cell") {
+          //铺满单元格
+          html = '<span class="hxiong-field hxplugin" style="text-align:center;width:auto;display:inline-block;width:calc(100% - 4px);height:100%;line-height:100%;" hxplugin="select" id="' + nodeId + '" title="' + obj.nodeName + '" obj="' + objStr + '" contenteditable="false">';
+          html += '<span class="hxiong-field hxiong-field-value" style="color: ' + obj.color + ';display:inline-block;width:100%;height:100%;line-height:100%;">' + opt.defaultValue + '</span>';
+          html += '</span>';
+        }
+        
+        editor.execCommand('insertHtml',html);
+        return true ;
+      } catch ( e ) {
+        console.error(e);
+        return false;
+      }
+    } else {
+      oNode.setAttribute('title',obj.nodeName);
+      oNode.setAttribute('obj',objStr);
+      let placeStyle = 'width:auto;'; //防止ueditor改变样式
+      if (obj.style == "select") {
+      oNode.innerHTML = '<span class="hxiong-field hx-left" style="'+placeStyle+'" contenteditable="false">&#8203;</span>'
+          + '<span class="hxiong-field hxiong-field-value" style="color: '+obj.color+'">'+ opt.defaultValue+'</span>'
+          + '<span class="hxiong-field hx-right" style="'+placeStyle+'" contenteditable="false">&#8203;</span>';
+      }else if(obj.style == "cell") {
+        oNode.innerHTML = '<span class="hxiong-field hxiong-field-value" style="color: ' + obj.color + ';display:inline-block;width:100%;height:100%;line-height:100%;">' + opt.defaultValue + '</span>';
+      }
+      oNode.removeAttribute("sltval");
+      delete UE.plugins[thePlugins].editdom;
+      return true;
+    }
+  };
+  function showDataSouceDialog() {
+      console.log('show dialog', nodeId)
+      window.editor.execCommand('datasource-picker', {
+        nodeId: nodeId,
+        onok: function (ok) {
+          var data = sessionStorage.getItem(nodeId);
+          console.log('store data', nodeId, data)
+          const d = JSON.parse(data)
+          if (d) {
+            $id('sourceName').value = d.name;
+            $id('sourceId').value = d.sourceId;
+
+            console.log(d)
+          }
+          console.log('this is input html, dialog was closed', ok)
+        }
+      })
+    }
+</script>
+</body>
+</html>

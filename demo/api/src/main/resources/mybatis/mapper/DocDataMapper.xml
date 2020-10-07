@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="hxiong.gloves.glovesapi.mapper.DocDataMapper" >
+  <insert id="insertBatach">
+    insert into t_doc_data(doc_id,`version`,node_id,source_id,`name`,`value`,`type`,regex,group_name,total_group_name,plan)
+    values
+    <foreach collection ="list" item="d" separator =",">
+      (#{d.docId},#{d.version}, #{d.nodeId}, #{d.sourceId}, #{d.name}, #{d.value}, #{d.type}, #{d.regex}, #{d.groupName}, #{d.totalGroupName}, #{d.plan})
+    </foreach >
+  </insert>
+</mapper>

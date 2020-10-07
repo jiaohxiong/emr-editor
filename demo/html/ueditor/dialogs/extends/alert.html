@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>提示框</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <link href="../../../dialog.css" type="text/css" rel="stylesheet" />
+  <link href="../../pretty/bootstrap.min.css" rel="stylesheet">
+  <link href="../../pretty/font-awesome.min.css" rel="stylesheet">
+  <link async rel="stylesheet" href="../../pretty/materialdesignicons.min.css" />
+  <link async rel="stylesheet" href="../../pretty/material-design-iconic-font.min.css" />
+  <link async rel="stylesheet" href="../../pretty/ypicons.min.css" />
+  <link async rel="stylesheet" href="../../pretty/ionicons.min.css" />
+  <link href="../../pretty/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="../../pretty/pretty.min.css">
+  <link rel="stylesheet" type="text/css" href="../../pretty/htmleaf-demo.css">
+  <script type="text/javascript" src="../../third-party/jquery-1.10.2.js"></script>
+  <script type="text/javascript" src="../internal.js"></script>
+  <style type="text/css">
+  </style>
+</head>
+
+<body>
+  <div id="message"
+    style="width: calc(100%); height: calc(100vh); text-align: center; line-height: calc(100vh);font-size:14px;font-weight: 700;">
+  </div>
+  <script src="../../../dialog.js"></script>
+  <script type="text/javascript">
+    window.onload = function (e) {
+      const message = decodeURI(getQuery("message"));
+      $("#message").text(message);
+    }
+  </script>
+</body>
+
+</html>

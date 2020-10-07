@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>数据源</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <link href="../../../dialog.css" type="text/css" rel="stylesheet" />
+  <link href="../../pretty/bootstrap.min.css" rel="stylesheet">
+  <link href="../../pretty/font-awesome.min.css" rel="stylesheet">
+  <link async rel="stylesheet" href="../../pretty/materialdesignicons.min.css" />
+  <link async rel="stylesheet" href="../../pretty/material-design-iconic-font.min.css" />
+  <link async rel="stylesheet" href="../../pretty/ypicons.min.css" />
+  <link async rel="stylesheet" href="../../pretty/ionicons.min.css" />
+  <link href="../../pretty/icon?family=Material+Icons" rel="stylesheet">
+  
+  <link rel="stylesheet" type="text/css" href="../../pretty/pretty.min.css">
+  <link rel="stylesheet" type="text/css" href="../../pretty/htmleaf-demo.css">
+  <script type="text/javascript" src="../../third-party/jquery-1.10.2.js"></script>
+  <script type="text/javascript" src="../internal.js"></script>
+  <style type="text/css">
+    table a {
+      text-decoration: none;
+      margin-left: 5px;
+      margin-right: 5px;
+      color: blue;
+    }
+
+    table td {
+      overflow-y: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="hx-content">
+    <div class="hx-search-bar">
+      <input type="text" placeholder="输入关键字查询" id="keywords">
+      <select id="sourceType">
+        <option value="赣州第一附属医院">赣州第一附属医院</option>
+        <option value="赣州人民医院">赣州人民医院</option>
+      </select>
+      <button id="search" class="btn small btn-primary" onclick="loadData()">查询</button>
+    </div>
+
+    <div class="hx-table-list table-responsive">
+      <table id="table" class="table table-condensed table-hover table-bordered" width="100%" cellspacing="0">
+        <thead>
+          <th style="width:20px;"></th>
+          <th style="width:40px;">序号</th>
+          <th style="width:220px;">编号</th>
+          <th style="width:150px;">名称</th>
+        </thead>
+        <tbody>
+
+        </tbody>
+      </table>
+    </div>
+    <nav aria-label="Page navigation">
+      <ul class="pagination" id="pagination">
+      </ul>
+    </nav>
+  </div>
+  <script src="../../../dialog.js"></script>
+  <script type="text/javascript">
+    // 获取所有电子病历
+    const REQUEST_DATASOURCE_GETALLDOC = "getDeptByPage";
+    var docList = []
+    function loadData(page = 1, perPage = 10, keywords = "") {
+      let k = $("#keywords").val();
+      getDeptByPage({
+        page: page,
+        perPage: perPage,
+        keywords: k
+      }).then(res=>{
+        $("#table tbody").empty();
+        res.items.map((item, index) => {
+          
+          $("#table tbody").append('<tr>' +
+            '<td><div class="pretty o-primary">' +
+            '<input type = "checkbox" name="deptId" value="'+item.deptId+'" dept-name="'+item.deptName+'" />' +
+            '<label><i class="mdi mdi-check"></i></label>' +
+            '</div ></td>' +
+            '<td>' + (index + 1) + '</td>' +
+            '<td>' + item.deptId + '</td>' +
+            '<td>' + item.deptName + '</td>' +
+            '</tr>')
+        });
+
+        if (res.count > perPage) {
+          $("#pagination").append('<li> <a href="javascript:void()" onclick="goPrePage()" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>');
+
+          let pageCount = parseInt((res.count - 1) / perPage);
+
+          for (let i = 1; i <= pageCount; i++) {
+            $("#pagination").append('<li><a href="javascript:void()" onclick="goPage()">1</a></li>');
+          }
+
+          $("#pagination").append('<li><a href="javascript:void()" onclick="goLastPage()" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>')
+        }
+      });
+    }
+    dialog.onok = function() {
+      let deptIds = [];
+      let deptNames=[];
+      $.each($("input[name='deptId']:checked"),function (){
+        deptIds.push($(this).val());
+        deptNames.push($(this).attr("dept-name"));
+      });
+      console.log(getQuery('nodeId'), {deptIds: deptIds, deptNames: deptNames})
+      localStorage.setItem(getQuery('nodeId') + "-dept", JSON.stringify({ deptIds: deptIds, deptNames: deptNames }));
+      dialog.onok2();
+    }
+    dialog.oncancel = function() {
+      localStorage.removeItem(getQuery('nodeId') + "-dept");
+    }
+    loadData();
+  </script>
+</body>
+
+</html>

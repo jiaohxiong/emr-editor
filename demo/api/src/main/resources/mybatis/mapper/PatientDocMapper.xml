@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="hxiong.gloves.glovesapi.mapper.PatientDocMapper">
+  <select id="getPatientDocListById" resultType="hxiong.gloves.glovesapi.entity.PatientDocInfo">
+    select
+
+
+      d.`id`,
+      d.`patient_doc_id`,
+      d.`doc_id`,
+      d.`doc_version`,
+      d.`patient_id`,
+      
+      d.`create_user_id`,
+      d.`create_user_name`,
+      d.`last_update_user_id`,
+      d.`last_upate_user_name`,
+      d.`last_update_time`,
+
+      dl.`patient_doc_version`,
+      dl.`create_user_id`,
+      dl.`create_user_name`,
+      dl.`create_time`
+
+    from gloves.t_patient_doc d
+      left join gloves.t_patient_doc_list dl
+    on d.patient_doc_id = dl.patient_doc_id
+      where d.patient_id = #{patientId}
+  </select>
+</mapper>
